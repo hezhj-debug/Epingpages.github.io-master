@@ -1,0 +1,24 @@
+# main links links
+main:
+  - title: "Biography"
+    url: /cv/
+  #- title: "Biography"
+  #  url: /Biography/
+    
+  - title: "Publications"
+    url: /publications/
+
+  - title: "Research"
+    url: /non-menu-page/    
+
+  - title: "Teaching"
+    url: /sitemap/    
+        
+  - title: "Honours"
+    url: /terms/
+    
+  - title: "Group"
+    url: /markdown/
+
+  - title: "Benchmark Datasets"
+    url: /year-archive/
