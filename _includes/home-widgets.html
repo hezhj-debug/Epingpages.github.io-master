@@ -1,23 +1,40 @@
-<!-- ================= 样式定义 ================= -->
+<!-- ================= 样式定义 (强制显示) ================= -->
 <style>
-  .home-section { margin-bottom: 60px; width: 100%; clear: both; display: block; }
-  .home-section h2 { margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #eaeaea; padding-bottom: 10px; }
-  .center-container { text-align: center; width: 100%; }
+  /* 强制清除浮动，防止布局塌陷 */
+  .home-section {
+    margin-bottom: 60px;
+    width: 100%;
+    display: block;
+    clear: both;
+    position: relative;
+  }
   
-  #word-cloud { background-color: #f8f9fa; border-radius: 12px; margin: 0 auto; }
-  #chartdiv { background-color: #f0f4f8; border-radius: 15px; margin: 0 auto; }
+  .home-section h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 10px;
+  }
 
+  /* 强制容器高度，防止被压缩 */
+  #word-cloud, #chartdiv { 
+    background-color: #f8f9fa; 
+    border-radius: 12px; 
+    margin: 0 auto; 
+    display: block !important;
+    min-height: 300px; /* 关键：强制最小高度 */
+  }
+  
+  #chartdiv {
+    min-height: 500px; /* 地图更高一点 */
+  }
+
+  /* 合作机构 */
   .partners-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; margin: 20px auto; }
   .partners-grid img { height: 60px; width: auto; opacity: 0.8; transition: transform 0.3s; }
   .partners-grid img:hover { transform: scale(1.1); opacity: 1; }
 
-  .contact-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
-  .custom-form { width: 90%; max-width: 500px; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); box-sizing: border-box; text-align: left; }
-  .form-input, .form-textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
-  .form-textarea { height: 150px; resize: vertical; }
-  .form-button { width: 100%; padding: 12px; background-color: #1976d2; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
-  .form-button:hover { background-color: #115293; }
-
+  /* 轮播图 */
   .gallery-container { width: 100%; overflow: hidden; background-color: #f9f9f9; border-radius: 10px; position: relative; }
   .gallery-track { display: flex; animation: scrollGallery 30s linear infinite; }
   .gallery-track img { width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
@@ -26,28 +43,62 @@
   .modal-content { margin: auto; display: block; max-width: 80%; max-height: 80%; }
   .close { position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; }
 
+  /* 表单 */
+  .center-container { text-align: center; width: 100%; margin-bottom: 30px; }
+  .contact-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .custom-form { width: 90%; max-width: 500px; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); box-sizing: border-box; text-align: left; }
+  .form-input, .form-textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+  .form-textarea { height: 150px; resize: vertical; }
+  .form-button { width: 100%; padding: 12px; background-color: #1976d2; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+  .form-button:hover { background-color: #115293; }
+
+  /* 谷歌地图 */
   .map-frame { width: 80%; height: 300px; border: 0; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); display: inline-block; }
 </style>
 
-<!-- ================= 1. Research Interests (本地词云) ================= -->
+<!-- ======================================================= -->
+<!--                 1. Research Interests (词云)            -->
+<!-- ======================================================= -->
 <div class="home-section">
   <h2>Research Interests 🎯</h2>
-  <script src="{{ '/assets/js/wordcloud2.js' | relative_url }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
   
   <div id="word-cloud" style="width: 100%; height: 300px;"></div>
 
   <script>
-    var wcTimer = setInterval(function() {
-      if (typeof WordCloud !== 'undefined') {
-        clearInterval(wcTimer);
-        var list = [["LiDAR", 40], ["Remote Sensing", 30], ["3D Point Clouds", 28], ["Deep Learning", 26], ["Sustainable Development", 20], ["Urban Mapping", 18], ["Semantic Segmentation", 22], ["Photogrammetry", 15], ["Processing", 17], ["Forest Ecology", 14]];
-        WordCloud(document.getElementById('word-cloud'), { list: list, gridSize: 8, weightFactor: 2.5, fontFamily: 'Arial', color: 'random-dark', backgroundColor: '#f8f9fa', rotateRatio: 0.5, shrinkToFit: true });
+    // 使用定时器检查库是否加载完成 (比 window.onload 更稳健)
+    var wcInterval = setInterval(function() {
+      if (typeof WordCloud !== 'undefined' && document.getElementById('word-cloud')) {
+        clearInterval(wcInterval); // 库加载成功，停止检查，开始运行
+        
+        var list = [
+            ["LiDAR", 40], ["Remote Sensing", 30], ["3D Point Clouds", 28], 
+            ["Deep Learning", 26], ["Sustainable Development", 20], 
+            ["Urban Mapping", 18], ["Semantic Segmentation", 22], 
+            ["Photogrammetry", 15], ["Processing", 17], ["Forest Ecology", 14]
+        ];
+        
+        // 增加一个延时，确保容器高度已被渲染
+        setTimeout(function(){
+            WordCloud(document.getElementById('word-cloud'), { 
+                list: list, 
+                gridSize: 8, 
+                weightFactor: 2.5, 
+                fontFamily: 'Arial, sans-serif', 
+                color: 'random-dark', 
+                backgroundColor: '#f8f9fa', 
+                rotateRatio: 0.5,
+                shrinkToFit: true
+            });
+        }, 200);
       }
-    }, 200);
+    }, 100); // 每100毫秒检查一次
   </script>
 </div>
 
-<!-- ================= 2. Representative Publications (轮播图) ================= -->
+<!-- ======================================================= -->
+<!--           2. Representative Publications (轮播图)       -->
+<!-- ======================================================= -->
 <div class="home-section">
   <h2>Representative Publications 🔥</h2>
   <div class="gallery-container">
@@ -64,7 +115,9 @@
   <script>function openModal(src){document.getElementById("modal").style.display="block";document.getElementById("modal-img").src=src;}</script>
 </div>
 
-<!-- ================= 3. Collaborations ================= -->
+<!-- ======================================================= -->
+<!--                 3. Collaborations (合作机构)            -->
+<!-- ======================================================= -->
 <div class="home-section">
   <h2>Collaborations 🤝</h2>
   <div class="partners-grid">
@@ -73,53 +126,115 @@
   </div>
 </div>
 
-<!-- ================= 4. Website Visitors (本地数据地图) ================= -->
+<!-- ======================================================= -->
+<!--                 4. Website Visitors (地图)              -->
+<!-- ======================================================= -->
 <div class="home-section">
   <h2>Website Visitors 👀</h2>
+  <!-- 核心库 -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-  <script src="{{ '/assets/js/worldLow.js' | relative_url }}"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
 
-  <div id="chartdiv" style="width: 100%; height: 500px; display: block;"></div>
+  <div id="chartdiv" style="width: 100%; height: 500px;"></div>
   
   <script>
-  var mapTimer = setInterval(function() {
-    if (typeof am5 !== 'undefined' && typeof am5geodata_worldLow !== 'undefined') {
-        clearInterval(mapTimer);
+  // 同样使用定时器检查机制
+  var mapInterval = setInterval(function() {
+    // 检查 am5, am5map, am5geodata_worldLow 是否全部加载
+    if (typeof am5 !== 'undefined' && typeof am5map !== 'undefined' && typeof am5geodata_worldLow !== 'undefined') {
+        clearInterval(mapInterval); // 停止检查
+
         am5.ready(function() {
-            am5.array.each(am5.registry.rootElements, function(root) { if (root.dom.id == "chartdiv") { root.dispose(); } });
             var root = am5.Root.new("chartdiv");
-            if(am5.themes && am5.themes.Animated) root.setThemes([am5.themes.Animated.new(root)]);
-            var chart = root.container.children.push(am5map.MapChart.new(root, { panX: "rotateX", panY: "none", projection: am5map.geoOrthographic(), homeGeoPoint: { longitude: 0, latitude: 20 } }));
-            var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: am5geodata_worldLow, valueField: "value", calculateAggregates: true }));
-            polygonSeries.mapPolygons.template.setAll({ tooltipText: "{name}", interactive: true, fill: am5.color(0xd0d0d0), stroke: am5.color(0xffffff) });
-            polygonSeries.mapPolygons.template.states.create("hover", { fill: am5.color(0x67b7dc) });
+            
+            if (am5.themes && am5.themes.Animated) {
+                root.setThemes([am5.themes.Animated.new(root)]);
+            }
+
+            var chart = root.container.children.push(am5map.MapChart.new(root, {
+                panX: "rotateX",
+                panY: "none",
+                projection: am5map.geoOrthographic(),
+                homeGeoPoint: { longitude: 0, latitude: 20 }
+            }));
+
+            var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldLow,
+                valueField: "value",
+                calculateAggregates: true
+            }));
+
+            polygonSeries.mapPolygons.template.setAll({
+                tooltipText: "{name}",
+                interactive: true,
+                fill: am5.color(0xd0d0d0), // 默认浅灰
+                stroke: am5.color(0xffffff)
+            });
+
+            polygonSeries.mapPolygons.template.states.create("hover", {
+                fill: am5.color(0x67b7dc)
+            });
+
+            // ★★★ 这里设置国家颜色逻辑 ★★★
             polygonSeries.mapPolygons.template.adapters.add("fill", function(fill, target) {
                 if (target.dataItem) {
-                    var val = target.dataItem.dataContext.value;
-                    if (val >= 80) return am5.color(0x0055aa);
-                    if (val >= 60) return am5.color(0x3399cc);
-                    if (val >= 40) return am5.color(0x67b7dc);
-                    if (val > 0)   return am5.color(0x99ddee);
+                    var value = target.dataItem.dataContext.value;
+                    if (value >= 80) return am5.color(0x0055aa);      // 深蓝 (US)
+                    if (value >= 60) return am5.color(0x3399cc);      // 中蓝 (CN)
+                    if (value >= 40) return am5.color(0x67b7dc);      // 浅蓝 (FR)
+                    if (value > 0)   return am5.color(0x99ddee);      // 淡蓝
                 }
                 return fill;
             });
-            polygonSeries.data.setAll([{ id: "US", value: 80 }, { id: "CN", value: 60 }, { id: "FR", value: 40 }, { id: "JP", value: 25 }, { id: "DE", value: 30 }]);
+
+            // ★★★ 设置数据 (必须与上面逻辑对应) ★★★
+            polygonSeries.data.setAll([
+                { id: "US", value: 80 },
+                { id: "CN", value: 60 },
+                { id: "FR", value: 40 },
+                { id: "JP", value: 25 },
+                { id: "DE", value: 30 }
+            ]);
+
+            // ★★★ 红点逻辑 ★★★
             var pointSeries = chart.series.push(am5map.MapPointSeries.new(root, {}));
-            pointSeries.bullets.push(function() { return am5.Bullet.new(root, { sprite: am5.Circle.new(root, { radius: 4, fill: am5.color(0xff0000), tooltipText: "{title}" }) }); });
-            pointSeries.data.setAll([{ geometry: { type: "Point", coordinates: [116.4074, 39.9042] }, title: "Beijing" }, { geometry: { type: "Point", coordinates: [-74.006, 40.7128] }, title: "New York" }, { geometry: { type: "Point", coordinates: [139.6917, 35.6895] }, title: "Tokyo" }]);
-            chart.animate({ key: "rotationX", to: 360, duration: 60000, loops: Infinity, easing: am5.ease.linear });
+            pointSeries.bullets.push(function() {
+                return am5.Bullet.new(root, {
+                    sprite: am5.Circle.new(root, {
+                        radius: 4,
+                        fill: am5.color(0xff0000), // 红点
+                        tooltipText: "{title}"
+                    })
+                });
+            });
+
+            pointSeries.data.setAll([
+                { geometry: { type: "Point", coordinates: [116.4074, 39.9042] }, title: "Beijing" },
+                { geometry: { type: "Point", coordinates: [-74.006, 40.7128] }, title: "New York" },
+                { geometry: { type: "Point", coordinates: [139.6917, 35.6895] }, title: "Tokyo" }
+            ]);
+
+            chart.animate({
+                key: "rotationX",
+                to: 360,
+                duration: 60000,
+                loops: Infinity,
+                easing: am5.ease.linear
+            });
         });
     }
-  }, 200);
+  }, 100); // 100ms 检查一次
   </script>
 </div>
 
-<!-- ================= 5. Contact / Join Us ================= -->
+<!-- ======================================================= -->
+<!--                 5. Contact / Join Us (表单)             -->
+<!-- ======================================================= -->
 <div class="home-section">
   <h2>Contact / Join Us 📬</h2>
-  <div class="center-container" style="margin-bottom: 30px;">
+  <div class="center-container">
       <p style="font-size: 18px; color: #555;">We are open for <span style="color: #1976d2; font-weight: bold;">collaboration</span> and <span style="color: #1976d2; font-weight: bold;">research opportunities</span>!</p>
   </div>
   <div class="contact-wrapper">
@@ -133,7 +248,9 @@
   </div>
 </div>
 
-<!-- ================= 6. Location ================= -->
+<!-- ======================================================= -->
+<!--                 6. Location (谷歌地图)                  -->
+<!-- ======================================================= -->
 <div class="home-section">
   <div class="center-container">
     <h3 style="margin-bottom: 20px;">📍 Our Location</h3>
@@ -141,24 +258,30 @@
   </div>
 </div>
 
-<!-- EmailJS -->
+<!-- EmailJS 稳健加载 -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script type="text/javascript">
-  var emailTimer = setInterval(function() {
+  var emailInterval = setInterval(function() {
     if (typeof emailjs !== 'undefined') {
-        clearInterval(emailTimer);
+        clearInterval(emailInterval);
         emailjs.init("Dj6gTC7Xq1QHguLQl"); 
+        
         document.getElementById('contact-form').addEventListener('submit', function(e) {
             e.preventDefault();
             var feedback = document.getElementById('form-feedback');
             feedback.innerText = "Sending...";
             feedback.style.display = "block";
-            emailjs.sendForm('service_96v6phh', 'template_817oi1o', this).then(function() {
-                feedback.innerText = "🎉 Message Sent!"; feedback.style.color = "green"; document.getElementById('contact-form').reset();
+            
+            emailjs.sendForm('service_96v6phh', 'template_817oi1o', this)
+            .then(function() {
+                feedback.innerText = "🎉 Message Sent!";
+                feedback.style.color = "green";
+                document.getElementById('contact-form').reset();
             }, function(error) {
-                feedback.innerText = "❌ Failed to send."; feedback.style.color = "red";
+                feedback.innerText = "❌ Failed to send.";
+                feedback.style.color = "red";
             });
         });
     }
-  }, 200);
+  }, 100);
 </script>
