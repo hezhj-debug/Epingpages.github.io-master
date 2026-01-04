@@ -189,7 +189,7 @@
 </div>
 
 <!-- ================= 4. Website Visitors (地图) ================= -->
-<div class="home-section">
+<!-- <div class="home-section">
   <h2>Website Visitors 👀</h2>
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
@@ -212,8 +212,118 @@
     chart.animate({ key: "rotationX", to: 360, duration: 60000, loops: Infinity, easing: am5.ease.linear });
   });
   </script>
-</div>
+</div> -->
+<!-- ================= 4. Website Visitors (地图修复版) ================= -->
+<div class="home-section">
+  <h2>Website Visitors 👀</h2>
+  
+  <!-- 引入 AmCharts 核心库 -->
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
 
+  <!-- 地图容器 -->
+  <div id="chartdiv" style="width: 100%; height: 500px;"></div>
+
+  <script>
+  // 使用 setTimeout 延迟 500ms 执行，确保库文件完全加载
+  setTimeout(function() {
+    am5.ready(function() {
+      // 检查 am5 是否加载
+      if (typeof am5 === 'undefined') {
+        console.error("AmCharts library not loaded!");
+        return;
+      }
+
+      // 1. 创建 root 元素
+      var root = am5.Root.new("chartdiv");
+
+      // 2. 设置主题
+      root.setThemes([am5.themes.Animated.new(root)]);
+
+      // 3. 创建地图实例
+      var chart = root.container.children.push(am5map.MapChart.new(root, {
+        panX: "rotateX",
+        panY: "none", // 禁止垂直拖动
+        projection: am5map.geoOrthographic(), // 球体投影
+        homeGeoPoint: { longitude: 0, latitude: 20 }
+      }));
+
+      // 4. 检查地图数据是否存在
+      if (typeof am5geodata_worldLow === 'undefined') {
+        console.error("Map data (worldLow) not loaded! Check your AdBlocker.");
+        // 如果数据没加载，手动显示一行提示文字
+        var label = root.tooltipContainer.children.push(am5.Label.new(root, {
+          x: am5.p50,
+          y: am5.p50,
+          centerX: am5.p50,
+          centerY: am5.p50,
+          text: "Map data blocked by AdBlocker.\nPlease disable it to view.",
+          background: am5.RoundedRectangle.new(root, { fill: am5.color(0xffffff), fillOpacity: 0.8 })
+        }));
+        return;
+      }
+
+      // 5. 创建多边形系列 (陆地)
+      var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+        geoJSON: am5geodata_worldLow,
+        valueField: "value",
+        calculateAggregates: true
+      }));
+
+      polygonSeries.mapPolygons.template.setAll({
+        tooltipText: "{name}",
+        interactive: true,
+        fill: am5.color(0xd0d0d0), // 陆地颜色：浅灰
+        stroke: am5.color(0xffffff) // 边框颜色：白
+      });
+
+      polygonSeries.mapPolygons.template.states.create("hover", {
+        fill: am5.color(0x67b7dc) // 悬停颜色：蓝
+      });
+
+      // 6. 热力图着色规则
+      polygonSeries.mapPolygons.template.adapters.add("fill", function(fill, target) {
+        if (target.dataItem) {
+            var value = target.dataItem.dataContext.value;
+            if (value > 50) return am5.color(0x0055aa); // 深蓝
+            else if (value > 20) return am5.color(0x3399cc); // 中蓝
+            else if (value > 0) return am5.color(0x99ddee); // 浅蓝
+        }
+        return fill;
+      });
+
+      // 7. 设置数据 (这里您可以修改为您真实的访问数据)
+      polygonSeries.data.setAll([
+        { id: "US", value: 80 },
+        { id: "CN", value: 60 },
+        { id: "FR", value: 40 },
+        { id: "JP", value: 25 },
+        { id: "DE", value: 30 },
+        { id: "GB", value: 20 },
+        { id: "AU", value: 15 }
+      ]);
+
+      // 8. 设置自动旋转动画
+      chart.animate({
+        key: "rotationX",
+        to: 360,
+        duration: 60000, // 60秒转一圈
+        loops: Infinity,
+        easing: am5.ease.linear
+      });
+
+      // 9. 添加背景 (海洋颜色) - 这是一个让球体更好看的可选步骤
+      chart.chartContainer.background.setAll({
+        fill: am5.color(0xf0f4f8),
+        fillOpacity: 0
+      });
+
+    }); // end am5.ready
+  }, 500); // end setTimeout
+  </script>
+</div>
 <!-- ================= 5. Contact / Join Us (表单 单栏居中) ================= -->
 <div class="home-section">
   <h2>Contact / Join Us 📬</h2>
