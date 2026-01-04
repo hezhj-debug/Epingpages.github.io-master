@@ -1,40 +1,25 @@
 <!-- ================= 样式定义 ================= -->
 <style>
-  /* 基础布局 */
   .home-section { margin-bottom: 60px; width: 100%; clear: both; display: block; position: relative; }
   .home-section h2 { margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #eaeaea; padding-bottom: 10px; }
   .center-container { text-align: center; width: 100%; margin-bottom: 30px; }
 
-  /* 容器样式 */
+  /* 容器样式 (强制高度) */
   #word-cloud, #chartdiv { 
     background-color: #f8f9fa; 
     border-radius: 12px; 
     margin: 0 auto; 
     display: block !important;
     min-height: 300px;
-    overflow: hidden; /* 防止漂浮溢出 */
+    overflow: hidden;
   }
-  
   #chartdiv { min-height: 500px; }
 
-  /* ★★★ 新增：词云漂浮动画样式 ★★★ */
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-  }
-
-  .word-float {
-    animation: float 6s ease-in-out infinite;
-    cursor: default;
-  }
-
-  /* 让不同位置的词语错开漂浮，显得更自然 */
+  /* 词云漂浮动画 */
+  @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+  .word-float { animation: float 6s ease-in-out infinite; cursor: default; }
   .word-float:nth-child(2n) { animation-delay: 1s; }
   .word-float:nth-child(3n) { animation-delay: 2s; }
-  .word-float:nth-child(4n) { animation-delay: 3s; }
-  .word-float:nth-child(5n) { animation-delay: 4s; }
-  .word-float:nth-child(6n) { animation-delay: 5s; }
 
   /* 合作机构 */
   .partners-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; margin: 20px auto; }
@@ -65,7 +50,7 @@
   .map-frame { width: 80%; height: 300px; border: 0; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); display: inline-block; }
 </style>
 
-<!-- ================= 1. Research Interests (带漂浮动画的词云) ================= -->
+<!-- ================= 1. Research Interests (词云) ================= -->
 <div class="home-section">
   <h2>Research Interests 🎯</h2>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
@@ -86,17 +71,9 @@
         
         setTimeout(function(){
             WordCloud(document.getElementById('word-cloud'), { 
-                list: list, 
-                gridSize: 8, 
-                weightFactor: 2.5, 
-                fontFamily: 'Arial, sans-serif', 
-                color: 'random-dark', 
-                backgroundColor: '#f8f9fa', 
-                rotateRatio: 0.5,
-                shrinkToFit: true,
-                drawOutOfBound: false,
-                // ★★★ 关键：添加这行代码启用漂浮样式 ★★★
-                classes: "word-float" 
+                list: list, gridSize: 8, weightFactor: 2.5, fontFamily: 'Arial, sans-serif', 
+                color: 'random-dark', backgroundColor: '#f8f9fa', rotateRatio: 0.5, 
+                shrinkToFit: true, drawOutOfBound: false, classes: "word-float" 
             });
         }, 200);
       }
@@ -130,47 +107,98 @@
   </div>
 </div>
 
-<!-- ================= 4. Website Visitors (本地数据地图) ================= -->
+<!-- ================= 4. Website Visitors (网络数据地图) ================= -->
 <div class="home-section">
   <h2>Website Visitors 👀</h2>
+  <!-- 核心库 -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-  <!-- 确保您已下载 worldLow.js 并放在 assets/js/ 目录下 -->
-  <script src="{{ '/assets/js/worldLow.js' | relative_url }}"></script>
+  <!-- ★★★ 恢复网络引用 (使用官方 CDN) ★★★ -->
+  <!-- 如果这个显示不出来，请务必关闭浏览器的广告拦截插件！ -->
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
 
   <div id="chartdiv" style="width: 100%; height: 500px;"></div>
   
   <script>
+  // 检查 am5 和 地图数据 是否加载
   var mapInterval = setInterval(function() {
-    if (typeof am5 !== 'undefined' && typeof am5geodata_worldLow !== 'undefined') {
-        clearInterval(mapInterval);
+    if (typeof am5 !== 'undefined' && typeof am5map !== 'undefined' && typeof am5geodata_worldLow !== 'undefined') {
+        clearInterval(mapInterval); // 停止检查
+
         am5.ready(function() {
+            // 清理旧实例
             am5.array.each(am5.registry.rootElements, function(root) { if (root.dom.id == "chartdiv") { root.dispose(); } });
+
             var root = am5.Root.new("chartdiv");
             if(am5.themes && am5.themes.Animated) root.setThemes([am5.themes.Animated.new(root)]);
-            var chart = root.container.children.push(am5map.MapChart.new(root, { panX: "rotateX", panY: "none", projection: am5map.geoOrthographic(), homeGeoPoint: { longitude: 0, latitude: 20 } }));
-            var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: am5geodata_worldLow, valueField: "value", calculateAggregates: true }));
-            polygonSeries.mapPolygons.template.setAll({ tooltipText: "{name}", interactive: true, fill: am5.color(0xd0d0d0), stroke: am5.color(0xffffff) });
+
+            var chart = root.container.children.push(am5map.MapChart.new(root, {
+                panX: "rotateX", panY: "none",
+                projection: am5map.geoOrthographic(), // 球体投影
+                homeGeoPoint: { longitude: 0, latitude: 20 }
+            }));
+
+            // 创建多边形 (国家)
+            var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldLow,
+                valueField: "value",
+                calculateAggregates: true
+            }));
+
+            polygonSeries.mapPolygons.template.setAll({
+                tooltipText: "{name}", interactive: true,
+                fill: am5.color(0xd0d0d0), // 默认灰色
+                stroke: am5.color(0xffffff)
+            });
+
             polygonSeries.mapPolygons.template.states.create("hover", { fill: am5.color(0x67b7dc) });
+
+            // ★★★ 颜色逻辑：根据数值变蓝 ★★★
             polygonSeries.mapPolygons.template.adapters.add("fill", function(fill, target) {
                 if (target.dataItem) {
                     var val = target.dataItem.dataContext.value;
-                    if (val >= 80) return am5.color(0x0055aa);
+                    if (val >= 80) return am5.color(0x0055aa); // 深蓝
                     if (val >= 60) return am5.color(0x3399cc);
                     if (val >= 40) return am5.color(0x67b7dc);
                     if (val > 0)   return am5.color(0x99ddee);
                 }
                 return fill;
             });
-            polygonSeries.data.setAll([{ id: "US", value: 80 }, { id: "CN", value: 60 }, { id: "FR", value: 40 }, { id: "JP", value: 25 }, { id: "DE", value: 30 }]);
+
+            // ★★★ 访问数据：设置哪些国家变蓝 ★★★
+            polygonSeries.data.setAll([
+                { id: "US", value: 80 }, // 美国
+                { id: "CN", value: 60 }, // 中国
+                { id: "FR", value: 40 }, 
+                { id: "JP", value: 25 }, 
+                { id: "DE", value: 30 }
+            ]);
+
+            // ★★★ 红点逻辑：显示首都 ★★★
             var pointSeries = chart.series.push(am5map.MapPointSeries.new(root, {}));
-            pointSeries.bullets.push(function() { return am5.Bullet.new(root, { sprite: am5.Circle.new(root, { radius: 4, fill: am5.color(0xff0000), tooltipText: "{title}" }) }); });
-            pointSeries.data.setAll([{ geometry: { type: "Point", coordinates: [116.4074, 39.9042] }, title: "Beijing" }, { geometry: { type: "Point", coordinates: [-74.006, 40.7128] }, title: "New York" }, { geometry: { type: "Point", coordinates: [139.6917, 35.6895] }, title: "Tokyo" }]);
+            pointSeries.bullets.push(function() {
+                return am5.Bullet.new(root, {
+                    sprite: am5.Circle.new(root, {
+                        radius: 4, 
+                        fill: am5.color(0xff0000), // 红色
+                        tooltipText: "{title}"
+                    })
+                });
+            });
+
+            pointSeries.data.setAll([
+                { geometry: { type: "Point", coordinates: [116.4074, 39.9042] }, title: "Beijing" },
+                { geometry: { type: "Point", coordinates: [-74.006, 40.7128] }, title: "New York" },
+                { geometry: { type: "Point", coordinates: [2.3522, 48.8566] }, title: "Paris" },
+                { geometry: { type: "Point", coordinates: [139.6917, 35.6895] }, title: "Tokyo" },
+                { geometry: { type: "Point", coordinates: [13.4050, 52.5200] }, title: "Berlin" }
+            ]);
+
             chart.animate({ key: "rotationX", to: 360, duration: 60000, loops: Infinity, easing: am5.ease.linear });
         });
     }
-  }, 200);
+  }, 100);
   </script>
 </div>
 
