@@ -1,7 +1,7 @@
 ---
 permalink: /
 title: ""
-layout: home-custom
+layout: home-custom 
 author_profile: true
 redirect_from: 
   - /about/
