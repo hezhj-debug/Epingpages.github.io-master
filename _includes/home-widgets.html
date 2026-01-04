@@ -1,0 +1,272 @@
+<!-- ================= 样式定义 (单栏居中) ================= -->
+<style>
+  /* 每个板块的通用间距 */
+  .home-section {
+    margin-bottom: 60px;
+    width: 100%;
+    clear: both;
+  }
+  
+  /* 标题样式适配 */
+  .home-section h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 10px;
+  }
+
+  /* 居中容器 */
+  .center-container {
+    text-align: center;
+    width: 100%;
+  }
+
+  /* 词云背景 */
+  #word-cloud {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    margin: 0 auto; /* 居中 */
+  }
+
+  /* 合作机构 Logo */
+  .partners-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    margin: 20px auto;
+  }
+  .partners-grid img {
+    height: 60px;
+    width: auto;
+    opacity: 0.8;
+    transition: transform 0.3s;
+  }
+  .partners-grid img:hover {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  /* 访客地图 */
+  #chartdiv {
+    background-color: #f0f4f8;
+    border-radius: 15px;
+    margin: 0 auto;
+  }
+
+  /* 表单样式 (严格限制宽度并居中) */
+  .contact-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 核心：水平居中 */
+  }
+  
+  .custom-form {
+    width: 90%;
+    max-width: 500px; /* 限制最大宽度，模仿图片样式 */
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+    text-align: left; /* 表单内部文字左对齐 */
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box; /* 防止溢出 */
+  }
+  
+  .form-textarea {
+    height: 150px;
+    resize: vertical;
+  }
+  
+  .form-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .form-button:hover { background-color: #115293; }
+
+  /* 谷歌地图 */
+  .map-wrapper {
+    text-align: center;
+    margin-top: 40px;
+  }
+  .map-frame {
+    width: 80%;
+    height: 300px;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    display: inline-block; /* 让text-align center生效 */
+  }
+</style>
+
+<!-- ================= 1. Research Interests (词云) ================= -->
+<div class="home-section">
+  <h2>Research Interests 🎯</h2>
+  <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.1.1/src/wordcloud2.js"></script>
+  
+  <div id="word-cloud" style="width: 100%; height: 300px;"></div>
+
+  <script>
+    setTimeout(function() {
+        var words = [
+          ["LiDAR", 40], ["Remote Sensing", 30], ["3D Point Clouds", 28],
+          ["Deep Learning", 26], ["Sustainable Development", 20], ["Urban Mapping", 18],
+          ["Semantic Segmentation", 22], ["Photogrammetry", 15],
+          ["Processing", 17], ["Forest Ecology", 14]
+        ];
+        var wcElement = document.getElementById('word-cloud');
+        if(wcElement) {
+            WordCloud(wcElement, {
+              list: words,
+              gridSize: 5,
+              weightFactor: 2.5,
+              fontFamily: 'Arial, sans-serif',
+              color: function () {
+                var colors = ["#67b7dc", "#3399cc", "#1976d2", "#0055aa"];
+                return colors[Math.floor(Math.random() * colors.length)];
+              },
+              rotateRatio: 0.4,
+              backgroundColor: "#f8f9fa",
+              shrinkToFit: true,
+              shape: "circle"
+            });
+        }
+    }, 800);
+  </script>
+</div>
+
+<!-- ================= 2. Representative Publications (轮播图) ================= -->
+<div class="home-section">
+  <h2>Representative Publications 🔥</h2>
+  <div class="gallery-container" style="width: 100%; overflow: hidden; background-color: #f9f9f9; border-radius: 10px; position: relative;">
+    <div class="gallery-track" style="display: flex; animation: scrollGallery 30s linear infinite;">
+      <!-- 图片链接请自行确认有效性 -->
+      <img src="https://github.com/Ting-Devin-Han/Ting-Devin-Han.github.io/raw/master/figures/Scene4U.gif" onclick="openModal(this.src)" style="width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer;">
+      <img src="https://github.com/Ting-Devin-Han/Ting-Devin-Han.github.io/raw/master/figures/HSPFormer-final.gif" onclick="openModal(this.src)" style="width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer;">
+      <img src="https://github.com/Ting-Devin-Han/Ting-Devin-Han.github.io/raw/master/figures/ASGFormer.gif" onclick="openModal(this.src)" style="width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer;">
+      <img src="https://github.com/Ting-Devin-Han/Epingpages.github.io/raw/master/images/PVCFormer.png" onclick="openModal(this.src)" style="width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer;">
+      <img src="https://github.com/Ting-Devin-Han/Epingpages.github.io/raw/master/images/SPTNet.png" onclick="openModal(this.src)" style="width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer;">
+      <img src="https://github.com/Ting-Devin-Han/Epingpages.github.io/raw/master/images/DBNet.gif" onclick="openModal(this.src)" style="width: 300px; height: 200px; object-fit: cover; margin: 10px; border-radius: 8px; flex-shrink: 0; cursor: pointer;">
+    </div>
+  </div>
+  <style>
+    @keyframes scrollGallery { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .gallery-container:hover .gallery-track { animation-play-state: paused; }
+    /* 模态框样式 */
+    .modal { display: none; position: fixed; z-index: 9999; padding-top: 60px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); }
+    .modal-content { margin: auto; display: block; max-width: 80%; max-height: 80%; }
+    .close { position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; }
+  </style>
+  <div id="modal" class="modal" onclick="document.getElementById('modal').style.display='none'"><span class="close">&times;</span><img class="modal-content" id="modal-img"></div>
+  <script>function openModal(src){document.getElementById("modal").style.display="block";document.getElementById("modal-img").src=src;}</script>
+</div>
+
+<!-- ================= 3. Collaborations (合作机构) ================= -->
+<div class="home-section">
+  <h2>Collaborations 🤝</h2>
+  <div class="partners-grid">
+    <a href="https://www.mit.edu/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/MIT_logo.svg" alt="MIT" /></a>
+    <a href="https://www.nasa.gov/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" alt="NASA" /></a>
+  </div>
+</div>
+
+<!-- ================= 4. Website Visitors (地图) ================= -->
+<div class="home-section">
+  <h2>Website Visitors 👀</h2>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <div id="chartdiv" style="width: 100%; height: 500px;"></div>
+  <script>
+  am5.ready(function() {
+    var root = am5.Root.new("chartdiv");
+    root.setThemes([am5.themes.Animated.new(root)]);
+    var chart = root.container.children.push(am5map.MapChart.new(root, { panX: "rotateX", panY: "none", projection: am5map.geoOrthographic(), homeGeoPoint: { longitude: 0, latitude: 20 } }));
+    var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: am5geodata_worldLow, valueField: "value", calculateAggregates: true }));
+    polygonSeries.mapPolygons.template.setAll({ tooltipText: "{name}", interactive: true, fill: am5.color(0xd0d0d0), stroke: am5.color(0xffffff) });
+    polygonSeries.mapPolygons.template.states.create("hover", { fill: am5.color(0x67b7dc) });
+    polygonSeries.mapPolygons.template.adapters.add("fill", function(fill, target) {
+        var value = target.dataItem.dataContext.value;
+        if (value > 50) return am5.color(0x0055aa); else if (value > 20) return am5.color(0x3399cc); else if (value > 0) return am5.color(0x99ddee); return fill;
+    });
+    polygonSeries.data.setAll([{ id: "US", value: 80 }, { id: "CN", value: 60 }, { id: "FR", value: 40 }, { id: "JP", value: 25 }]);
+    chart.animate({ key: "rotationX", to: 360, duration: 60000, loops: Infinity, easing: am5.ease.linear });
+  });
+  </script>
+</div>
+
+<!-- ================= 5. Contact / Join Us (表单 单栏居中) ================= -->
+<div class="home-section">
+  <h2>Contact / Join Us 📬</h2>
+  
+  <div class="center-container" style="margin-bottom: 30px;">
+      <p style="font-size: 18px; color: #555;">
+          We are open for <span style="color: #1976d2; font-weight: bold;">collaboration</span> and <span style="color: #1976d2; font-weight: bold;">research opportunities</span> !
+      </p>
+  </div>
+
+  <div class="contact-wrapper">
+    <form id="contact-form" class="custom-form">
+      <input type="text" name="name" placeholder="Your Name" required class="form-input">
+      <input type="email" name="email" placeholder="Your Email" required class="form-input">
+      <textarea name="message" placeholder="Your Message" required class="form-textarea"></textarea>
+      <button type="submit" class="form-button">Send Message</button>
+      <p id="form-feedback" style="margin-top:10px; display:none; text-align:center;"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ================= 6. Location (谷歌地图 单栏居中) ================= -->
+<div class="home-section">
+  <div class="center-container">
+    <h3 style="margin-bottom: 20px;">📍 Our Location</h3>
+    <iframe 
+      class="map-frame"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.486648453003!2d113.59994261541433!3d22.369668985295746!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x340160ea703b3c8d%3A0x9bd49c60c917fcc4!2sSun%20Yat-sen%20University%20Zhuhai%20Campus!5e0!3m2!1sen!2sca!4v1714284742584!5m2!1sen!2sca" 
+      allowfullscreen="" loading="lazy">
+    </iframe>
+  </div>
+</div>
+
+<!-- EmailJS 配置 -->
+<script type="text/javascript" src="https://cdn.emailjs.com/sdk/3.2/email.min.js"></script>
+<script type="text/javascript">
+  (function(){
+    emailjs.init('Dj6gTC7Xq1QHguLQl'); // 您的 Public Key
+  })();
+
+  document.getElementById('contact-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var feedback = document.getElementById('form-feedback');
+    emailjs.sendForm('service_96v6phh', 'template_817oi1o', this)
+      .then(function() {
+        feedback.innerText = "🎉 Message Sent!";
+        feedback.style.color = "green";
+        feedback.style.display = "block";
+        document.getElementById('contact-form').reset();
+      }, function(error) {
+        feedback.innerText = "❌ Failed to send.";
+        feedback.style.color = "red";
+        feedback.style.display = "block";
+      });
+  });
+</script>
