@@ -165,4 +165,4 @@ Yiping Chen is an **Associate Professor** / **Ph.D. Supervisor** at the [School 
 </div>
 <br>
 
-{% include home-widgets.html %}；
+{% include home-widgets.html %}
