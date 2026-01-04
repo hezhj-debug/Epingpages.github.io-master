@@ -1,20 +1,19 @@
 <!-- ================= 样式定义 ================= -->
 <style>
-  /* 全局重置 */
   .home-section { margin-bottom: 60px; width: 100%; clear: both; display: block; position: relative; }
   .home-section h2 { margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #eaeaea; padding-bottom: 10px; }
   .center-container { text-align: center; width: 100%; margin-bottom: 30px; }
 
-  /* 容器强制高度 */
+  /* 容器样式 (强制高度) */
   #word-cloud, #chartdiv { 
     background-color: #f8f9fa; 
     border-radius: 12px; 
     margin: 0 auto; 
     display: block !important;
     min-height: 300px;
-    position: relative;
+    overflow: hidden;
   }
-  #chartdiv { min-height: 500px; background-color: #f0f4f8; }
+  #chartdiv { min-height: 500px; }
 
   /* 词云漂浮动画 */
   @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
@@ -62,12 +61,14 @@
     var wcInterval = setInterval(function() {
       if (typeof WordCloud !== 'undefined' && document.getElementById('word-cloud')) {
         clearInterval(wcInterval);
+        
         var list = [
             ["LiDAR", 40], ["Remote Sensing", 30], ["3D Point Clouds", 28], 
             ["Deep Learning", 26], ["Sustainable Development", 20], 
             ["Urban Mapping", 18], ["Semantic Segmentation", 22], 
             ["Photogrammetry", 15], ["Processing", 17], ["Forest Ecology", 14]
         ];
+        
         setTimeout(function(){
             WordCloud(document.getElementById('word-cloud'), { 
                 list: list, gridSize: 8, weightFactor: 2.5, fontFamily: 'Arial, sans-serif', 
@@ -106,44 +107,39 @@
   </div>
 </div>
 
-<!-- ================= 4. Website Visitors (终极修复版地图) ================= -->
+<!-- ================= 4. Website Visitors (网络数据地图) ================= -->
 <div class="home-section">
   <h2>Website Visitors 👀</h2>
   <!-- 核心库 -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-  
-  <!-- ★★★ 关键修改：改用 amcharts 官方主站数据源，避开 cdn 拦截 ★★★ -->
-  <script src="https://www.amcharts.com/lib/5/geodata/worldLow.js"></script>
+  <!-- ★★★ 恢复网络引用 (使用官方 CDN) ★★★ -->
+  <!-- 如果这个显示不出来，请务必关闭浏览器的广告拦截插件！ -->
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
 
-  <div id="chartdiv" style="width: 100%; height: 500px;">
-    <!-- 加载提示 -->
-    <div id="map-loading" style="text-align:center; padding-top:200px; color:#999;">Loading Map Data...</div>
-  </div>
+  <div id="chartdiv" style="width: 100%; height: 500px;"></div>
   
   <script>
+ 
   var mapInterval = setInterval(function() {
-    // 检查核心库和数据文件是否都已就绪
     if (typeof am5 !== 'undefined' && typeof am5map !== 'undefined' && typeof am5geodata_worldLow !== 'undefined') {
-        clearInterval(mapInterval);
-        document.getElementById('map-loading').style.display = 'none'; // 隐藏加载提示
+        clearInterval(mapInterval); 
 
         am5.ready(function() {
-            // 销毁可能存在的旧实例
+            
             am5.array.each(am5.registry.rootElements, function(root) { if (root.dom.id == "chartdiv") { root.dispose(); } });
 
             var root = am5.Root.new("chartdiv");
             if(am5.themes && am5.themes.Animated) root.setThemes([am5.themes.Animated.new(root)]);
 
-            // 1. 创建地球
             var chart = root.container.children.push(am5map.MapChart.new(root, {
                 panX: "rotateX", panY: "none",
-                projection: am5map.geoOrthographic(),
-                homeGeoPoint: { longitude: 100, latitude: 30 } // 初始中心对准亚洲
+                projection: am5map.geoOrthographic(), 
+                homeGeoPoint: { longitude: 0, latitude: 20 }
             }));
 
-            // 2. 创建国家层
+          
             var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
                 geoJSON: am5geodata_worldLow,
                 valueField: "value",
@@ -152,49 +148,45 @@
 
             polygonSeries.mapPolygons.template.setAll({
                 tooltipText: "{name}", interactive: true,
-                fill: am5.color(0xd0d0d0), // 默认浅灰色
+                fill: am5.color(0xd0d0d0), 
                 stroke: am5.color(0xffffff)
             });
 
             polygonSeries.mapPolygons.template.states.create("hover", { fill: am5.color(0x67b7dc) });
 
-            // ★★★ 3. 颜色映射逻辑 (变蓝的关键) ★★★
+     
             polygonSeries.mapPolygons.template.adapters.add("fill", function(fill, target) {
-                if (target.dataItem && target.dataItem.dataContext) {
+                if (target.dataItem) {
                     var val = target.dataItem.dataContext.value;
-                    if (val) {
-                        if (val >= 80) return am5.color(0x0055aa); // 深蓝
-                        if (val >= 60) return am5.color(0x3399cc); // 中蓝
-                        if (val >= 40) return am5.color(0x67b7dc); // 浅蓝
-                        if (val > 0)   return am5.color(0x99ddee); // 淡蓝
-                    }
+                    if (val >= 80) return am5.color(0x0055aa);
+                    if (val >= 60) return am5.color(0x3399cc);
+                    if (val >= 40) return am5.color(0x67b7dc);
+                    if (val > 0)   return am5.color(0x99ddee);
                 }
-                return fill; // 没有数据的国家保持默认灰
+                return fill;
             });
 
-            // ★★★ 4. 注入国家数据 (有数据的国家才会变色) ★★★
+            
             polygonSeries.data.setAll([
-                { id: "US", value: 80 }, // 美国
-                { id: "CN", value: 70 }, // 中国 (中深蓝)
-                { id: "FR", value: 40 }, // 法国
-                { id: "JP", value: 25 }, // 日本
-                { id: "DE", value: 30 }, // 德国
-                { id: "GB", value: 20 }, // 英国
-                { id: "AU", value: 15 }  // 澳洲
+                { id: "US", value: 80 }, 
+                { id: "CN", value: 60 }, 
+                { id: "FR", value: 40 }, 
+                { id: "JP", value: 25 }, 
+                { id: "DE", value: 30 }
             ]);
 
-            // ★★★ 5. 红点逻辑 (首都) ★★★
+            
             var pointSeries = chart.series.push(am5map.MapPointSeries.new(root, {}));
             pointSeries.bullets.push(function() {
                 return am5.Bullet.new(root, {
                     sprite: am5.Circle.new(root, {
-                        radius: 4, fill: am5.color(0xff0000), // 红色圆点
+                        radius: 4, 
+                        fill: am5.color(0xff0000),
                         tooltipText: "{title}"
                     })
                 });
             });
 
-            // 注入红点坐标
             pointSeries.data.setAll([
                 { geometry: { type: "Point", coordinates: [116.4074, 39.9042] }, title: "Beijing" },
                 { geometry: { type: "Point", coordinates: [-74.006, 40.7128] }, title: "New York" },
@@ -203,18 +195,17 @@
                 { geometry: { type: "Point", coordinates: [13.4050, 52.5200] }, title: "Berlin" }
             ]);
 
-            // 6. 旋转动画
             chart.animate({ key: "rotationX", to: 360, duration: 60000, loops: Infinity, easing: am5.ease.linear });
         });
     }
-  }, 200);
+  }, 100);
   </script>
 </div>
 
 <!-- ================= 5. Contact / Join Us ================= -->
 <div class="home-section">
   <h2>Contact / Join Us 📬</h2>
-  <div class="center-container" style="margin-bottom: 30px;">
+  <div class="center-container">
       <p style="font-size: 18px; color: #555;">We are open for <span style="color: #1976d2; font-weight: bold;">collaboration</span> and <span style="color: #1976d2; font-weight: bold;">research opportunities</span>!</p>
   </div>
   <div class="contact-wrapper">
